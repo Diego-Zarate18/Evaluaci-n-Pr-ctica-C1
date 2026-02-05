@@ -65,11 +65,11 @@ export default async function TopProductsPage({ searchParams }: Props) {
   }));
 
   return (
-    <main style={{ padding: 24 }}>
+    <main className="p-6">
       <h1>Productos más vendidos</h1>
       <p>Ranking por ingresos totales</p>
 
-      <table border={1} cellPadding={6}>
+      <table>
         <thead>
           <tr>
             <th>Rank</th>

@@ -27,11 +27,11 @@ export default async function PaymentMixPage() {
   }));
 
   return (
-    <main style={{ padding: 24 }}>
+    <main className="p-6">
       <h1>Distribución de pagos</h1>
       <p>Métodos de pago y monto total procesado</p>
 
-      <table border={1} cellPadding={6}>
+      <table>
         <thead>
           <tr>
             <th>Método de pago</th>

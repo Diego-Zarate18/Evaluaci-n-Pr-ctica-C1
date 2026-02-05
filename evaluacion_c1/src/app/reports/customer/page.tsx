@@ -30,11 +30,11 @@ export default async function CustomerValuePage() {
   }));
 
   return (
-    <main style={{ padding: 24 }}>
+    <main className="p-6">
       <h1>Valor por cliente</h1>
       <p>Total de compras acumuladas por cliente</p>
 
-      <table border={1} cellPadding={6}>
+      <table>
         <thead>
           <tr>
             <th>Cliente</th>

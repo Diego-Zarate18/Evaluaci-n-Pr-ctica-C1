@@ -46,11 +46,11 @@ export default async function InventoryRiskPage({ searchParams }: Props) {
   }));
 
   return (
-    <main style={{ padding: 24 }}>
+    <main className="p-6">
       <h1>Inventario en riesgo</h1>
       <p>Productos con bajo stock por categoría</p>
 
-      <table border={1} cellPadding={6}>
+      <table>
         <thead>
           <tr>
             <th>Producto</th>

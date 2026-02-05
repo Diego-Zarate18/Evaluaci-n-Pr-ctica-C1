@@ -48,19 +48,30 @@ export default async function SalesReportPage({ searchParams }: Props) {
     totalTickets > 0 ? (totalVentas / totalTickets).toFixed(2) : "0.00";
 
   return (
-    <main style={{ padding: 24 }}>
+    <main className="p-6">
       <h1>Ventas diarias</h1>
       <p>Ingresos, número de tickets y ticket promedio por día</p>
 
       {}
-      <section style={{ margin: "16px 0", padding: 12, border: "1px solid #ccc" }}>
-        <strong>Total ventas:</strong> ${totalVentas.toFixed(2)} <br />
-        <strong>Total tickets:</strong> {totalTickets} <br />
-        <strong>Ticket promedio:</strong> ${ticketPromedio}
+      <section className="my-6 p-4 border border-gray-200 rounded-lg bg-gray-50 dark:bg-zinc-900 dark:border-zinc-800 shadow-sm">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 text-center sm:text-left">
+          <div>
+            <div className="text-sm text-gray-500 dark:text-gray-400">Total ventas</div>
+            <div className="text-2xl font-bold">${totalVentas.toFixed(2)}</div>
+          </div>
+          <div>
+            <div className="text-sm text-gray-500 dark:text-gray-400">Total tickets</div>
+            <div className="text-2xl font-bold">{totalTickets}</div>
+          </div>
+          <div>
+            <div className="text-sm text-gray-500 dark:text-gray-400">Ticket promedio</div>
+            <div className="text-2xl font-bold">${ticketPromedio}</div>
+          </div>
+        </div>
       </section>
 
       {}
-      <table border={1} cellPadding={6}>
+      <table>
         <thead>
           <tr>
             <th>Fecha</th>

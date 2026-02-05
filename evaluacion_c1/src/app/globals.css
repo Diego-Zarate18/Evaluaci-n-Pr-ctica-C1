@@ -23,4 +23,84 @@ body {
   background: var(--background);
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
+  line-height: 1.5;
+}
+
+@layer base {
+  main {
+    max-width: 1024px;
+    margin: 0 auto;
+    font-family: system-ui, -apple-system, sans-serif;
+  }
+
+  h1 {
+    font-size: 1.875rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+    color: var(--foreground);
+    letter-spacing: -0.025em;
+  }
+
+  p {
+    color: #666;
+    margin-bottom: 1.5rem;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 1rem;
+    font-size: 0.95rem;
+    background-color: var(--background);
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+  }
+
+  th {
+    background-color: #f3f4f6;
+    color: #111827;
+    font-weight: 600;
+    text-align: left;
+    padding: 12px 16px;
+    border-bottom: 2px solid #e5e7eb;
+  }
+
+  td {
+    padding: 12px 16px;
+    border-bottom: 1px solid #e5e7eb;
+    color: inherit;
+    opacity: 0.9;
+  }
+
+  tbody tr:last-child td {
+    border-bottom: none;
+  }
+
+  tbody tr:hover {
+    background-color: #f9fafb;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    p { color: #a3a3a3; }
+    
+    table {
+      background-color: #171717;
+      border: 1px solid #333;
+    }
+
+    th {
+      background-color: #262626;
+      color: #ededed;
+      border-bottom-color: #404040;
+    }
+
+    td {
+      border-bottom-color: #404040;
+    }
+
+    tbody tr:hover {
+      background-color: #262626;
+    }
+  }
 }
