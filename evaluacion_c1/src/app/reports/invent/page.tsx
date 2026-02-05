@@ -2,76 +2,81 @@ export const dynamic = "force-dynamic";
 
 import { query } from "@/lib/db";
 
-type Row = {
-  product_id: number;
-  product_name: string;
-  category_name: string;
-  stock: number;
-  nivel_riesgo: string;
-  porcentaje_riesgo: number;
-};
-
 type Props = {
-  searchParams: Promise<{
-    category?: string;
-  }>;
+  searchParams: Promise<{ [key: string]: string | undefined }>;
 };
 
-const CATEGORY_WHITELIST = ["Bebidas", "Panadería", "Snacks"];
-
-export default async function InventoryRiskPage({ searchParams }: Props) {
-  const paramsResolved = await searchParams;
-  const category = paramsResolved?.category;
+export default async function InventoryRiskPage(props: Props) {
+  const searchParams = await props.searchParams;
+  const riskFilter = searchParams.risk || "ALL";
 
   let sql = `
-    SELECT product_id, product_name, category_name, stock, nivel_riesgo, porcentaje_riesgo
+    SELECT 
+      product_id, 
+      product_name, 
+      category_name, 
+      stock, 
+      risk_level, 
+      stock_percentage_relative
     FROM vw_inventory_risk
   `;
+
   const params: any[] = [];
 
-  if (category && CATEGORY_WHITELIST.includes(category)) {
-    sql += ` WHERE category_name = $1`;
-    params.push(category);
+  if (riskFilter !== "ALL") {
+    sql += ` WHERE risk_level = $1`;
+    params.push(riskFilter);
   }
 
-  const rawRows = await query(sql, params) as any[];
+  sql += ` ORDER BY stock ASC`;
 
-  const rows: Row[] = rawRows.map((r) => ({
-    product_id: r.product_id,
-    product_name: r.product_name,
-    category_name: r.category_name,
-    stock: Number(r.stock),
-    nivel_riesgo: r.nivel_riesgo,
-    porcentaje_riesgo: Number(r.porcentaje_riesgo),
-  }));
+  const rows = (await query(sql, params)) as any[];
 
   return (
     <main className="p-6">
-      <h1>Inventario en riesgo</h1>
-      <p>Productos con bajo stock por categoría</p>
+      <div className="flex flex-col md:flex-row justify-between items-center mb-6 gap-4">
+        <div>
+          <h1 className="text-2xl font-bold text-red-600">Alerta de Inventario</h1>
+          <p className="text-gray-600">Productos con stock crítico</p>
+        </div>
 
-      <table>
-        <thead>
-          <tr>
-            <th>Producto</th>
-            <th>Categoría</th>
-            <th>Stock</th>
-            <th>Nivel riesgo</th>
-            <th>% relativo</th>
-          </tr>
-        </thead>
-        <tbody>
-          {rows.map((r) => (
-            <tr key={r.product_id}>
-              <td>{r.product_name}</td>
-              <td>{r.category_name}</td>
-              <td>{r.stock}</td>
-              <td>{r.nivel_riesgo}</td>
-              <td>{r.porcentaje_riesgo.toFixed(2)}%</td>
+        <div className="flex gap-2">
+            <a href="?risk=ALL" className={`px-3 py-1 rounded border text-sm ${riskFilter === 'ALL' ? 'bg-black text-white' : ''}`}>Todos</a>
+            <a href="?risk=ALTO" className={`px-3 py-1 rounded border text-sm ${riskFilter === 'ALTO' ? 'bg-red-600 text-white border-red-600' : ''}`}>Alto Riesgo</a>
+            <a href="?risk=MEDIO" className={`px-3 py-1 rounded border text-sm ${riskFilter === 'MEDIO' ? 'bg-yellow-500 text-white border-yellow-500' : ''}`}>Medio</a>
+        </div>
+      </div>
+
+      <div className="overflow-x-auto border rounded-lg shadow-sm">
+        <table className="w-full text-left text-sm">
+          <thead className="bg-gray-100 dark:bg-zinc-800 border-b">
+            <tr>
+              <th className="p-4">Producto</th>
+              <th className="p-4">Categoría</th>
+              <th className="p-4 text-center">Stock Actual</th>
+              <th className="p-4">Nivel de Riesgo</th>
+              <th className="p-4 text-right">% Relativo</th>
             </tr>
-          ))}
-        </tbody>
-      </table>
+          </thead>
+          <tbody className="divide-y">
+            {rows.map((r: any) => (
+              <tr key={r.product_id} className="hover:bg-gray-50 dark:hover:bg-zinc-900">
+                <td className="p-4 font-medium">{r.product_name}</td>
+                <td className="p-4 text-gray-500">{r.category_name}</td>
+                <td className="p-4 text-center font-mono font-bold">{r.stock}</td>
+                <td className="p-4">
+                  <span className={`px-2 py-1 rounded text-xs font-bold 
+                    ${r.risk_level === 'ALTO' ? 'bg-red-100 text-red-700' : 
+                      r.risk_level === 'MEDIO' ? 'bg-yellow-100 text-yellow-700' : 'bg-green-100 text-green-700'}`}>
+                    {r.risk_level}
+                  </span>
+                </td>
+                <td className="p-4 text-right text-gray-500">{r.stock_percentage_relative}%</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
     </main>
   );
 }

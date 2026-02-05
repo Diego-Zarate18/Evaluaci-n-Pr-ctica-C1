@@ -1,94 +1,103 @@
 export const dynamic = "force-dynamic";
 
 import { query } from "@/lib/db";
-
-type RawRow = {
-  product_id: number;
-  product_name: string;
-  revenue: string;
-  units: string;
-  rank_revenue: number;
-};
-
-type Row = {
-  product_id: number;
-  product_name: string;
-  revenue: number;
-  units: number;
-  rank_revenue: number;
-};
+import Link from "next/link";
 
 type Props = {
-  searchParams: Promise<{
-    search?: string;
-    page?: string;
-    limit?: string;
-  }>;
+  searchParams: Promise<{ [key: string]: string | undefined }>;
 };
 
-export default async function TopProductsPage({ searchParams }: Props) {
-  const paramsResolved = await searchParams;
-
-  const search = paramsResolved?.search ?? "";
-  const page = Math.max(Number(paramsResolved?.page ?? 1), 1);
-  const limit = Math.min(Math.max(Number(paramsResolved?.limit ?? 5), 1), 20);
+export default async function TopProductsPage(props: Props) {
+  const searchParams = await props.searchParams;
+  
+  const page = Number(searchParams.page) || 1;
+  const limit = 10;
   const offset = (page - 1) * limit;
+  const searchTerm = searchParams.q || "";
+
 
   let sql = `
-    SELECT product_id, product_name, revenue, units, rank_revenue
+    SELECT *
     FROM vw_top_products_ranked
+    WHERE product_name ILIKE $1
+    ORDER BY rank_revenue ASC
+    LIMIT $2 OFFSET $3
   `;
 
-  const params: any[] = [];
-
-  if (search) {
-    sql += ` WHERE product_name ILIKE $1`;
-    params.push(`%${search}%`);
-  }
-
-  sql += `
-    ORDER BY rank_revenue
-    LIMIT $${params.length + 1}
-    OFFSET $${params.length + 2}
-  `;
-
-  params.push(limit, offset);
-
-  const rawRows = await query(sql, params) as RawRow[];
-
-  const rows: Row[] = rawRows.map((r) => ({
-    product_id: r.product_id,
-    product_name: r.product_name,
-    revenue: Number(r.revenue),
-    units: Number(r.units),
-    rank_revenue: r.rank_revenue,
-  }));
+  
+  const rawRows = (await query(sql, [`%${searchTerm}%`, limit, offset])) as any[];
 
   return (
     <main className="p-6">
-      <h1>Productos más vendidos</h1>
-      <p>Ranking por ingresos totales</p>
+      <div className="flex flex-col md:flex-row justify-between items-center mb-6 gap-4">
+        <div>
+          <h1 className="text-2xl font-bold">Top Productos</h1>
+          <p className="text-gray-600">Ranking por ingresos generados</p>
+        </div>
+        
+        {}
+        <form className="flex gap-2">
+          <input
+            type="text"
+            name="q"
+            defaultValue={searchTerm}
+            placeholder="Buscar producto..."
+            className="border p-2 rounded w-64 dark:bg-zinc-900 dark:border-zinc-700"
+          />
+          <button type="submit" className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
+            Buscar
+          </button>
+        </form>
+      </div>
 
-      <table>
-        <thead>
-          <tr>
-            <th>Rank</th>
-            <th>Producto</th>
-            <th>Ingresos</th>
-            <th>Unidades</th>
-          </tr>
-        </thead>
-        <tbody>
-          {rows.map((r) => (
-            <tr key={r.product_id}>
-              <td>{r.rank_revenue}</td>
-              <td>{r.product_name}</td>
-              <td>${r.revenue.toFixed(2)}</td>
-              <td>{r.units}</td>
+      <div className="overflow-x-auto border rounded-lg shadow-sm">
+        <table className="w-full text-left text-sm">
+          <thead className="bg-gray-100 dark:bg-zinc-800 border-b">
+            <tr>
+              <th className="p-4 w-20">Rank</th>
+              <th className="p-4">Producto</th>
+              <th className="p-4 text-center">Unidades</th>
+              <th className="p-4 text-right">Ingresos Totales</th>
             </tr>
-          ))}
-        </tbody>
-      </table>
+          </thead>
+          <tbody className="divide-y">
+            {rawRows.length === 0 ? (
+              <tr><td colSpan={4} className="p-8 text-center text-gray-500">No se encontraron productos</td></tr>
+            ) : (
+              rawRows.map((r: any) => (
+                <tr key={r.product_id} className="hover:bg-gray-50 dark:hover:bg-zinc-900 transition-colors">
+                  <td className="p-4 font-bold text-gray-500 text-center">#{r.rank_revenue}</td>
+                  <td className="p-4 font-medium">{r.product_name}</td>
+                  <td className="p-4 text-center">{r.total_units}</td>
+                  <td className="p-4 text-right font-bold text-green-600">
+                    ${Number(r.total_revenue).toFixed(2)}
+                  </td>
+                </tr>
+              ))
+            )}
+          </tbody>
+        </table>
+      </div>
+
+      {}
+      <div className="flex justify-center gap-4 mt-6">
+        {page > 1 && (
+          <Link
+            href={`/reports/top-products?page=${page - 1}&q=${searchTerm}`}
+            className="px-4 py-2 border rounded hover:bg-gray-100 dark:hover:bg-zinc-800"
+          >
+            ← Anterior
+          </Link>
+        )}
+        {rawRows.length === limit && (
+          <Link
+            href={`/reports/top-products?page=${page + 1}&q=${searchTerm}`}
+            className="px-4 py-2 border rounded hover:bg-gray-100 dark:hover:bg-zinc-800"
+          >
+            Siguiente →
+          </Link>
+        )}
+      </div>
     </main>
   );
 }
