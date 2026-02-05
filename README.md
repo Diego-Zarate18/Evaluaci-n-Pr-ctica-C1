@@ -1,4 +1,4 @@
-# AWOS Analytics Dashboard
+# AWOS
 
 **Evaluación Práctica Corte 1 - NextJS + BDA**
 
@@ -61,7 +61,7 @@ Ejecuta los siguientes comandos en tu terminal mientras el contenedor está corr
    SELECT * FROM vw_sales_daily LIMIT 5;
    ```
 
-3. **Prueba de FALLO (Intentar leer una tabla protegida):**
+3. **Prueba de FALLO:**
    ```sql
    SELECT * FROM customers;
    ```
@@ -72,21 +72,19 @@ Ejecuta los siguientes comandos en tu terminal mientras el contenedor está corr
 
 
 **Caso 1: Filtro por fecha en ventas**
-Consulta optimizada por índice en `orders.created_at`.
 
 ```sql
 EXPLAIN
 SELECT *
 FROM orders
 WHERE created_at BETWEEN '2024-01-01' AND '2024-01-31';
-
+```
 **Resultado:**
 ```text
 Index Scan using idx_orders_created_at on orders
 ```
 
 **Caso 2: Búsqueda de Productos por nombre**
-Consulta optimizada por índice en `name`.
 ```sql
 EXPLAIN
 SELECT *
