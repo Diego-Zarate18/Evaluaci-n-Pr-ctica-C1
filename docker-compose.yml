@@ -1,0 +1,30 @@
+version: '3.9'
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: awos_db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: awos
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - awos_db_data:/var/lib/postgresql/data
+      - ./db:/docker-entrypoint-initdb.d
+
+  web:
+    build:
+      context: ./evaluacion_c1
+    container_name: awos_web
+    restart: unless-stopped
+    environment:
+      DATABASE_URL: postgresql://app_user:app_pass@db:5432/awos
+    ports:
+      - "3000:3000"
+    depends_on:
+      - db
+
+volumes:
+  awos_db_data:
