@@ -1,7 +1,5 @@
 export const dynamic = "force-dynamic";
 
-import { query } from "@/lib/db";
-
 type Row = {
   payment_method: string;
   total_payments: number;
@@ -9,18 +7,14 @@ type Row = {
 };
 
 export default async function PaymentMixPage() {
-  const sql = `
-    SELECT
-      payment_method,
-      total_payments,
-      total_amount
-    FROM vw_payment_mix
-    ORDER BY total_amount DESC
-  `;
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000";
+  const res = await fetch(
+    `${baseUrl}/api/reports/payment`,
+    { cache: "no-store" }
+  );
+  const { rows: rawRows } = await res.json();
 
-  const rawRows = (await query(sql)) as any[];
-
-  const rows: Row[] = rawRows.map((r) => ({
+  const rows: Row[] = rawRows.map((r: any) => ({
     payment_method: r.payment_method,
     total_payments: Number(r.total_payments),
     total_amount: Number(r.total_amount),

@@ -1,7 +1,7 @@
 export const dynamic = "force-dynamic";
 
-import { query } from "@/lib/db";
 import Link from "next/link";
+import SearchProductsForm from "./SearchForm";
 
 type Props = {
   searchParams: Promise<{ [key: string]: string | undefined }>;
@@ -12,20 +12,14 @@ export default async function TopProductsPage(props: Props) {
   
   const page = Number(searchParams.page) || 1;
   const limit = 10;
-  const offset = (page - 1) * limit;
   const searchTerm = searchParams.q || "";
 
-
-  let sql = `
-    SELECT *
-    FROM vw_top_products_ranked
-    WHERE product_name ILIKE $1
-    ORDER BY rank_revenue ASC
-    LIMIT $2 OFFSET $3
-  `;
-
-  
-  const rawRows = (await query(sql, [`%${searchTerm}%`, limit, offset])) as any[];
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000";
+  const res = await fetch(
+    `${baseUrl}/api/reports/top-products?page=${page}&limit=${limit}&q=${encodeURIComponent(searchTerm)}`,
+    { cache: "no-store" }
+  );
+  const { rows: rawRows } = await res.json();
 
   return (
     <main className="p-6">
@@ -35,19 +29,7 @@ export default async function TopProductsPage(props: Props) {
           <p className="text-gray-600">Ranking por ingresos generados</p>
         </div>
         
-        {}
-        <form className="flex gap-2">
-          <input
-            type="text"
-            name="q"
-            defaultValue={searchTerm}
-            placeholder="Buscar producto..."
-            className="border p-2 rounded w-64 dark:bg-zinc-900 dark:border-zinc-700"
-          />
-          <button type="submit" className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
-            Buscar
-          </button>
-        </form>
+        <SearchProductsForm />
       </div>
 
       <div className="overflow-x-auto border rounded-lg shadow-sm">

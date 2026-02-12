@@ -1,7 +1,5 @@
 export const dynamic = "force-dynamic";
 
-import { query } from "@/lib/db";
-
 type Row = {
   customer_id: number;
   customer_name: string;
@@ -10,19 +8,14 @@ type Row = {
 };
 
 export default async function CustomerValuePage() {
-  const sql = `
-    SELECT
-      customer_id,
-      customer_name,
-      total_orders,
-      total_spent
-    FROM vw_customer_value
-    ORDER BY total_spent DESC
-  `;
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000";
+  const res = await fetch(
+    `${baseUrl}/api/reports/customer`,
+    { cache: "no-store" }
+  );
+  const { rows: rawRows } = await res.json();
 
-  const rawRows = (await query(sql)) as any[];
-
-  const rows: Row[] = rawRows.map((r) => ({
+  const rows: Row[] = rawRows.map((r: any) => ({
     customer_id: Number(r.customer_id),
     customer_name: r.customer_name,
     total_orders: Number(r.total_orders),

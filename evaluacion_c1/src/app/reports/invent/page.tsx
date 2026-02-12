@@ -1,6 +1,6 @@
 export const dynamic = "force-dynamic";
 
-import { query } from "@/lib/db";
+import Link from "next/link";
 
 type Props = {
   searchParams: Promise<{ [key: string]: string | undefined }>;
@@ -10,27 +10,12 @@ export default async function InventoryRiskPage(props: Props) {
   const searchParams = await props.searchParams;
   const riskFilter = searchParams.risk || "ALL";
 
-  let sql = `
-    SELECT 
-      product_id, 
-      product_name, 
-      category_name, 
-      stock, 
-      risk_level, 
-      stock_percentage_relative
-    FROM vw_inventory_risk
-  `;
-
-  const params: any[] = [];
-
-  if (riskFilter !== "ALL") {
-    sql += ` WHERE risk_level = $1`;
-    params.push(riskFilter);
-  }
-
-  sql += ` ORDER BY stock ASC`;
-
-  const rows = (await query(sql, params)) as any[];
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000";
+  const res = await fetch(
+    `${baseUrl}/api/reports/invent?risk=${riskFilter}`,
+    { cache: "no-store" }
+  );
+  const { rows } = await res.json();
 
   return (
     <main className="p-6">
@@ -41,9 +26,9 @@ export default async function InventoryRiskPage(props: Props) {
         </div>
 
         <div className="flex gap-2">
-            <a href="?risk=ALL" className={`px-3 py-1 rounded border text-sm ${riskFilter === 'ALL' ? 'bg-black text-white' : ''}`}>Todos</a>
-            <a href="?risk=ALTO" className={`px-3 py-1 rounded border text-sm ${riskFilter === 'ALTO' ? 'bg-red-600 text-white border-red-600' : ''}`}>Alto Riesgo</a>
-            <a href="?risk=MEDIO" className={`px-3 py-1 rounded border text-sm ${riskFilter === 'MEDIO' ? 'bg-yellow-500 text-white border-yellow-500' : ''}`}>Medio</a>
+            <Link href="?risk=ALL" className={`px-3 py-1 rounded border text-sm transition-colors ${riskFilter === 'ALL' ? 'bg-black text-white' : 'hover:bg-gray-100'}`}>Todos</Link>
+            <Link href="?risk=ALTO" className={`px-3 py-1 rounded border text-sm transition-colors ${riskFilter === 'ALTO' ? 'bg-red-600 text-white border-red-600' : 'hover:bg-gray-100'}`}>Alto Riesgo</Link>
+            <Link href="?risk=MEDIO" className={`px-3 py-1 rounded border text-sm transition-colors ${riskFilter === 'MEDIO' ? 'bg-yellow-500 text-white border-yellow-500' : 'hover:bg-gray-100'}`}>Medio</Link>
         </div>
       </div>
 

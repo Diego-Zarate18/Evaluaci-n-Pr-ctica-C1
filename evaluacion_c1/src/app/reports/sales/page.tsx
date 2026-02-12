@@ -1,6 +1,6 @@
 export const dynamic = "force-dynamic";
 
-import { query } from "@/lib/db";
+import DateFilterForm from "./DateFilterForm";
 
 type Props = {
   searchParams: Promise<{ [key: string]: string | undefined }>;
@@ -15,18 +15,12 @@ export default async function SalesReportPage(props: Props) {
   const dateFrom = searchParams.from || defaultFrom;
   const dateTo = searchParams.to || defaultTo;
 
-  const sql = `
-    SELECT 
-      sale_date, 
-      total_revenue, 
-      ticket_count, 
-      avg_ticket
-    FROM vw_sales_daily
-    WHERE sale_date BETWEEN $1 AND $2
-    ORDER BY sale_date DESC
-  `;
-
-  const rows = (await query(sql, [dateFrom, dateTo])) as any[];
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000";
+  const res = await fetch(
+    `${baseUrl}/api/reports/sales?from=${dateFrom}&to=${dateTo}`,
+    { cache: "no-store" }
+  );
+  const { rows } = await res.json();
 
   const totalRevenue = rows.reduce((acc: number, r: any) => acc + Number(r.total_revenue), 0);
   const totalTickets = rows.reduce((acc: number, r: any) => acc + Number(r.ticket_count), 0);
@@ -39,19 +33,7 @@ export default async function SalesReportPage(props: Props) {
           <p className="text-gray-600">Resumen histórico de operaciones</p>
         </div>
 
-        <form className="flex items-end gap-2 bg-gray-50 p-3 rounded border dark:bg-zinc-900 dark:border-zinc-800">
-          <div>
-            <label className="block text-xs text-gray-500">Desde</label>
-            <input type="date" name="from" defaultValue={dateFrom} className="border rounded p-1 text-sm bg-white dark:bg-zinc-800" />
-          </div>
-          <div>
-            <label className="block text-xs text-gray-500">Hasta</label>
-            <input type="date" name="to" defaultValue={dateTo} className="border rounded p-1 text-sm bg-white dark:bg-zinc-800" />
-          </div>
-          <button type="submit" className="bg-black text-white px-3 py-1 rounded text-sm h-[30px]">
-             Filtrar
-          </button>
-        </form>
+        <DateFilterForm defaultFrom={defaultFrom} defaultTo={defaultTo} />
       </div>
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
