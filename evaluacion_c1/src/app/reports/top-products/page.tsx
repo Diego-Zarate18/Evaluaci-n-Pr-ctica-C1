@@ -1,7 +1,6 @@
 export const dynamic = "force-dynamic";
 
 import Link from "next/link";
-import SearchProductsForm from "./SearchForm";
 
 type Props = {
   searchParams: Promise<{ [key: string]: string | undefined }>;
@@ -29,7 +28,19 @@ export default async function TopProductsPage(props: Props) {
           <p className="text-gray-600">Ranking por ingresos generados</p>
         </div>
         
-        <SearchProductsForm />
+        {}
+        <form className="flex gap-2">
+          <input
+            type="text"
+            name="q"
+            defaultValue={searchTerm}
+            placeholder="Buscar producto..."
+            className="border p-2 rounded w-64 dark:bg-zinc-900 dark:border-zinc-700"
+          />
+          <button type="submit" className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
+            Buscar
+          </button>
+        </form>
       </div>
 
       <div className="overflow-x-auto border rounded-lg shadow-sm">

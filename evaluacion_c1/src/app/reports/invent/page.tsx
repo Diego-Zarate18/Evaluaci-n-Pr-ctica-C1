@@ -1,7 +1,5 @@
 export const dynamic = "force-dynamic";
 
-import Link from "next/link";
-
 type Props = {
   searchParams: Promise<{ [key: string]: string | undefined }>;
 };
@@ -26,9 +24,9 @@ export default async function InventoryRiskPage(props: Props) {
         </div>
 
         <div className="flex gap-2">
-            <Link href="?risk=ALL" className={`px-3 py-1 rounded border text-sm transition-colors ${riskFilter === 'ALL' ? 'bg-black text-white' : 'hover:bg-gray-100'}`}>Todos</Link>
-            <Link href="?risk=ALTO" className={`px-3 py-1 rounded border text-sm transition-colors ${riskFilter === 'ALTO' ? 'bg-red-600 text-white border-red-600' : 'hover:bg-gray-100'}`}>Alto Riesgo</Link>
-            <Link href="?risk=MEDIO" className={`px-3 py-1 rounded border text-sm transition-colors ${riskFilter === 'MEDIO' ? 'bg-yellow-500 text-white border-yellow-500' : 'hover:bg-gray-100'}`}>Medio</Link>
+            <a href="?risk=ALL" className={`px-3 py-1 rounded border text-sm ${riskFilter === 'ALL' ? 'bg-black text-white' : ''}`}>Todos</a>
+            <a href="?risk=ALTO" className={`px-3 py-1 rounded border text-sm ${riskFilter === 'ALTO' ? 'bg-red-600 text-white border-red-600' : ''}`}>Alto Riesgo</a>
+            <a href="?risk=MEDIO" className={`px-3 py-1 rounded border text-sm ${riskFilter === 'MEDIO' ? 'bg-yellow-500 text-white border-yellow-500' : ''}`}>Medio</a>
         </div>
       </div>
 
